@@ -1,7 +1,7 @@
-name: CI Test
+name: Manual Run Workflow
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Enables manual trigger from the GitHub UI
 
 jobs:
   test:
