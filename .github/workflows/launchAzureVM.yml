@@ -1,19 +1,11 @@
-name: SSH Deploy Test
+name: CI Test
 
 on:
-  workflow_dispatch:  # allows you to run it manually
+  workflow_dispatch:
 
 jobs:
-  ssh-test:
+  test:
     runs-on: ubuntu-latest
-
-    env:
-      AZURE_VM_USERNAME: ${{ secrets.AZURE_VM_USERNAME }}
-      AZURE_VM_PASSWORD: ${{ secrets.AZURE_VM_PASSWORD }}
-      VM_HOST: ${{ secrets.VM_HOST }}
-
     steps:
-      - name: Run SSH command on Azure VM
-        run: |
-          echo "Trying to connect to $AZURE_VM_USERNAME@$VM_HOST"
-          sshpass -p "$AZURE_VM_PASSWORD" -- ssh -vvv -o StrictHostKeyChecking=no "$AZURE_VM_USERNAME@$VM_HOST" "echo 'Logged in successfully!'"
+      - name: Say Hello
+        run: echo "Hello from GitHub Actions!"
