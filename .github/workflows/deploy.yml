@@ -1,0 +1,30 @@
+
+name: Manual Trigger Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+      debug_mode:
+        description: 'Enable debug mode'
+        required: false
+        default: 'false'
+
+jobs:
+  run-manually:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Show input values
+        run: |
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Debug Mode: ${{ github.event.inputs.debug_mode }}"
+
+      - name: Run your script
+        run: |
+          echo "Running script in ${{ github.event.inputs.environment }} mode..."
