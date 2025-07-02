@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: SSH into VM and install Symphony
-        uses: appleboy/ssh-action@v0.1.8
+        uses: actions/checkout@v4
         with:
           port: 22
           script: |
