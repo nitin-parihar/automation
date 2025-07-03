@@ -11,6 +11,9 @@ jobs:
       - name: Checkout workflow repo
         uses: actions/checkout@v4
 
+      - name: Print home directory
+        run: echo "HOME is $HOME"
+
       - name: Set up Rust
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -56,7 +59,7 @@ jobs:
 
       - name: Run symphony-api
         shell: bash
-        working-directory: ${{ env.HOME }}/symphony/api
+        working-directory: /home/runner/symphony/api
         run: |
           set -e
           API_BIN="./symphony-api"
@@ -71,7 +74,7 @@ jobs:
 
       - name: Check if log file exists
         shell: bash
-        working-directory: ${{ env.HOME }}/symphony/api
+        working-directory: /home/runner/symphony/api
         run: |
           if [ -f "symphony-api.log" ]; then
             echo "Log file created."
@@ -83,4 +86,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: symphony-api-log
-          path: symphony-api.log
+          path: /home/runner/symphony/api/symphony-api.log
