@@ -1,9 +1,8 @@
-name: Deploy Harbor on GitHub Runner
+name: Deploy Harbor
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+
 
 jobs:
   deploy-harbor:
@@ -28,10 +27,11 @@ jobs:
 
     - name: Download Harbor Offline Installer and Deploy
       run: |
-        HARBOR_VERSION=2.8.1
-        wget https://github.com/goharbor/harbor/releases/download/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tar.gz
-        tar xvf harbor-offline-installer-v${HARBOR_VERSION}.tar.gz
+        HARBOR_VERSION=2.13.0
+        wget https://sourceforge.net/projects/harbor.mirror/files/v2.13.0/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
+        tar xvf harbor-offline-installer-v${HARBOR_VERSION}.tgz
         cd harbor
+        ...
 
         # Copy template and configure minimal harbor.yml
         cp harbor.yml.tmpl harbor.yml
