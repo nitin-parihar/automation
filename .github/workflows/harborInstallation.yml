@@ -26,33 +26,39 @@ jobs:
 
     - name: Download and Deploy Harbor v2.13.0
       run: |
-        # Set hostname to a valid external-accessible name
-        HOSTNAME=harbor.localdomain
         HARBOR_VERSION=2.13.0
+        HOSTNAME=harbor.localdomain
 
-        # Download Harbor offline installer
+        # Download Harbor from SourceForge mirror (GitHub doesn't host offline installer anymore)
         wget https://sourceforge.net/projects/harbor.mirror/files/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
 
-        # Extract and move into Harbor directory
+        # Extract and configure
         tar xvf harbor-offline-installer-v${HARBOR_VERSION}.tgz
         cd harbor
 
-        # Copy and configure harbor.yml
         cp harbor.yml.tmpl harbor.yml
-        sed -i "s/^hostname:.*/hostname: $HOSTNAME/" harbor.yml
+
+        # Set hostname
+        if grep -q "^hostname:" harbor.yml; then
+          sed -i "s/^hostname:.*/hostname: $HOSTNAME/" harbor.yml
+        else
+          echo "hostname: $HOSTNAME" >> harbor.yml
+        fi
+
+        # Set admin password and enable HTTP
         sed -i "s/^harbor_admin_password:.*/harbor_admin_password: Harbor12345/" harbor.yml
         sed -i "s/^# *http:/http:/; s/^# *port: 80/  port: 80/" harbor.yml
 
-        # Disable https config block (if present)
+        # Disable HTTPS block (comment it out cleanly)
         sed -i '/^https:/,/^$/s/^/#/' harbor.yml
 
-        # Optional: Add hostname to /etc/hosts so local Docker networking resolves
+        # Make sure hostname resolves locally
         echo "127.0.0.1 $HOSTNAME" | sudo tee -a /etc/hosts
 
         # Install Harbor
         ./install.sh --with-docker-compose
 
-        # Start Harbor services
+        # Start services (just in case)
         docker compose up -d
 
     - name: Verify Harbor containers
