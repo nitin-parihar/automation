@@ -26,19 +26,33 @@ jobs:
 
     - name: Download and Deploy Harbor v2.13.0
       run: |
+        # Set hostname to a valid external-accessible name
+        HOSTNAME=harbor.localdomain
         HARBOR_VERSION=2.13.0
-        wget https://sourceforge.net/projects/harbor.mirror/files/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download \
-          -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
+
+        # Download Harbor offline installer
+        wget https://sourceforge.net/projects/harbor.mirror/files/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
+
+        # Extract and move into Harbor directory
         tar xvf harbor-offline-installer-v${HARBOR_VERSION}.tgz
         cd harbor
 
+        # Copy and configure harbor.yml
         cp harbor.yml.tmpl harbor.yml
-        sed -i "s/^hostname: .*/hostname: harbor.localdomain/" harbor.yml
-        sed -i "s/^harbor_admin_password: .*/harbor_admin_password: Harbor12345/" harbor.yml
-        sed -i "s/^# http:/http:/; s/^#   port: 80/  port: 80/" harbor.yml
-        sed -i "s/^# https:/# https:/" harbor.yml
+        sed -i "s/^hostname:.*/hostname: $HOSTNAME/" harbor.yml
+        sed -i "s/^harbor_admin_password:.*/harbor_admin_password: Harbor12345/" harbor.yml
+        sed -i "s/^# *http:/http:/; s/^# *port: 80/  port: 80/" harbor.yml
 
+        # Disable https config block (if present)
+        sed -i '/^https:/,/^$/s/^/#/' harbor.yml
+
+        # Optional: Add hostname to /etc/hosts so local Docker networking resolves
+        echo "127.0.0.1 $HOSTNAME" | sudo tee -a /etc/hosts
+
+        # Install Harbor
         ./install.sh --with-docker-compose
+
+        # Start Harbor services
         docker compose up -d
 
     - name: Verify Harbor containers
