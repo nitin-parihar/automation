@@ -61,29 +61,19 @@ jobs:
           else
             echo "Go directory not found. Skipping Go build."
           fi
-
-      - name: Run symphony-api
-        shell: bash
-        run: |
-          set -e
-          API_DIR="$HOME/symphony/api"
-          API_BIN="$API_DIR/symphony-api"
-          if [ -f "$API_BIN" ]; then
-            echo "Starting symphony-api in foreground (30 s max)..."
-            cd "$API_DIR"
-            # Run the API with a timeout and capture stdout+stderr to symphony-api.log
-            timeout 30s ./symphony-api \
-              -c symphony-api-no-k8s.json -l Debug \
-              | tee symphony-api.log
-            echo "symphony-api run completed or timed out."
-          else
-            echo "symphony-api binary not found. Skipping execution."
-            exit 0
-          fi
-      
-      - name: Upload symphony-api log
-        uses: actions/upload-artifact@v4
-        with:
-          name: symphony-api-log
-          path: symphony-api.log
-          if-no-files-found: error
+    
+          - name: Run symphony-api
+                  shell: bash
+                  run: |
+                    set -e
+                    API_BIN="$HOME/symphony/api/symphony-api"
+                    if [ -f "$API_BIN" ]; then
+                      echo "Starting symphony-api in background..."
+                      cd $HOME/symphony/api
+                      nohup env SYMPHONY_API_URL="http://localhost:8082/v1alpha2/" USE_SERVICE_ACCOUNT_TOKENS="false" \
+                        ./symphony-api -c ./symphony-api-no-k8s.json -l Debug > symphony-api.log 2>&1 &
+                      echo "symphony-api started."
+                    else
+                      echo "symphony-api binary not found. Skipping startup."
+                    fi
+                    
