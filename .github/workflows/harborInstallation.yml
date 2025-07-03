@@ -24,41 +24,41 @@ jobs:
         docker --version
         docker compose version
 
-    - name: Download and Deploy Harbor v2.13.0
-      run: |
-        set -e  # stop on any error
-        HARBOR_VERSION=2.13.0
-        HOSTNAME=harbor.localdomain
+   - name: Download, Configure & Deploy Harbor v2.13.0 (with Debug)
+  run: |
+    set -e
 
-        wget https://sourceforge.net/projects/harbor.mirror/files/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download \
-          -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
-        tar xvf harbor-offline-installer-v${HARBOR_VERSION}.tgz
-        cd harbor
+    HARBOR_VERSION=2.13.0
+    HOSTNAME=harbor.localdomain
 
-        cp harbor.yml.tmpl harbor.yml
+    # Download installer
+    wget "https://sourceforge.net/projects/harbor.mirror/files/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download" \
+      -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
 
-        # Set hostname
-        sed -i "s|^hostname:.*|hostname: ${HOSTNAME}|" harbor.yml
+    tar xvf harbor-offline-installer-v${HARBOR_VERSION}.tgz
+    cd harbor
 
-        # Set password and enable HTTP
-        sed -i "s|^harbor_admin_password:.*|harbor_admin_password: Harbor12345|" harbor.yml
-        sed -i "s|^#\s*http:|http:|" harbor.yml
-        sed -i "s|^#\s*port: 80|  port: 80|" harbor.yml
+    # Prepare config
+    cp harbor.yml.tmpl harbor.yml
 
-        # Disable HTTPS block
-        sed -i '/^https:/,/^$/s/^/#/' harbor.yml
+    # Apply configuration changes
+    sed -i "s|^hostname:.*|hostname: $HOSTNAME|" harbor.yml
+    sed -i "s|^harbor_admin_password:.*|harbor_admin_password: Harbor12345|" harbor.yml
+    sed -i "s|^#\s*http:|http:|" harbor.yml
+    sed -i "s|^#\s*port: 80|  port: 80|" harbor.yml
+    sed -i '/^https:/,/^$/s/^/#/' harbor.yml
 
-        # DEBUG: Print harbor.yml to logs
-        echo ">>> DEBUG: harbor.yml contents:"
-        cat harbor.yml
-        echo ">>> END DEBUG"
+    # DEBUG: Show final config to log
+    echo ">>> DEBUG: harbor.yml contents <<<"
+    cat harbor.yml
+    echo ">>> End DEBUG <<<"
 
-        # Add hosts entry
-        echo "127.0.0.1 ${HOSTNAME}" | sudo tee -a /etc/hosts
+    # Ensure local resolution
+    echo "127.0.0.1 $HOSTNAME" | sudo tee -a /etc/hosts
 
-        ./install.sh --with-docker-compose
-        docker compose up -d
-
+    # Run installer
+    ./install.sh --with-docker-compose
+    docker compose up -d
 
     - name: Verify Harbor containers
       run: docker ps -a
