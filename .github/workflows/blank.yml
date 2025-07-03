@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout workflow repo (optional)
+      - name: Checkout workflow repo
         uses: actions/checkout@v4
 
       - name: Set up Go
@@ -35,7 +35,7 @@ jobs:
           echo "Directory structure of symphony repo:"
           ls -laR $HOME/symphony
 
-      - name: Build Rust Library (if exists)
+      - name: Build Rust Library
         shell: bash
         run: |
           set -e
@@ -48,7 +48,7 @@ jobs:
             echo "Rust directory not found. Skipping Rust build."
           fi
 
-      - name: Build Go binary (if exists)
+      - name: Build Go binary
         shell: bash
         run: |
           set -e
@@ -62,7 +62,7 @@ jobs:
             echo "Go directory not found. Skipping Go build."
           fi
 
-      - name: Run symphony-api (if built)
+      - name: Run symphony-api
         shell: bash
         run: |
           set -e
