@@ -1,9 +1,7 @@
-name: Deploy Harbor
+name: Deploy Harbor on GitHub Runner
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy-harbor:
@@ -22,4 +20,29 @@ jobs:
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         sudo apt-get update
-        sudo apt-get install -y docker-ce docker-ce-cli containerd.io dock
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+        docker --version
+        docker compose version
+
+    - name: Download Harbor Offline Installer and Deploy
+      run: |
+        HARBOR_VERSION=2.8.1
+        wget https://github.com/goharbor/harbor/releases/download/v${HARBOR_VERSION}/harbor-offline-installer-${HARBOR_VERSION}.tgz
+        tar xvf harbor-offline-installer-${HARBOR_VERSION}.tgz
+        cd harbor
+
+        # Copy template and configure minimal harbor.yml
+        cp harbor.yml.tmpl harbor.yml
+        sed -i "s/^hostname: .*/hostname: localhost/" harbor.yml
+        sed -i "s/^harbor_admin_password: .*/harbor_admin_password: Harbor12345/" harbor.yml
+        sed -i "s/^# http:/http:/; s/^#   port: 80/  port: 80/" harbor.yml
+        sed -i "s/^# https:/# https:/" harbor.yml
+
+        # Install Harbor with docker-compose
+        ./install.sh --with-docker-compose
+
+        # Start Harbor services
+        docker compose up -d
+
+    - name: Verify Harbor containers
+      run: docker ps -a
