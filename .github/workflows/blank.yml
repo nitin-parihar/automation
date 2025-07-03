@@ -77,9 +77,15 @@ jobs:
             echo "symphony-api binary not found. Skipping startup."
           fi
           
+      - name: Wait for log file to be created
+        run: |
+          while [ ! -f "$HOME/symphony/api/symphony-api.log" ]; do
+            sleep 1
+          done
+      
       - name: Upload symphony-api log
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: symphony-api-log
           path: $HOME/symphony/api/symphony-api.log
+
