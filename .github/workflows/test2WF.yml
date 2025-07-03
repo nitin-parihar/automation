@@ -66,24 +66,24 @@ jobs:
           if [ -f "$API_BIN" ]; then
             echo "Starting symphony-api in background..."
             nohup env SYMPHONY_API_URL="http://localhost:8082/v1alpha2/" USE_SERVICE_ACCOUNT_TOKENS="false" \
-              ./symphony-api -c ./symphony-api-no-k8s.json -l Debug > symphony-api.log 2>&1 &
+              ./symphony-api -c ./symphony-api-no-k8s.json -l Debug > symphony-api.html 2>&1 &
             echo "symphony-api started."
           else
             echo "symphony-api binary not found. Skipping startup."
           fi
 
-      - name: Check if log file exists
+      - name: Check if html file exists
         shell: bash
         working-directory: /home/runner/symphony/api
         run: |
-          if [ -f "symphony-api.log" ]; then
-            echo "Log file created."
+          if [ -f "symphony-api.html" ]; then
+            echo "html file created."
           else
-            echo "Log file not found."
+            echo "html file not found."
           fi
 
-      - name: Upload symphony-api log
+      - name: Upload symphony-api html
         uses: actions/upload-artifact@v4
         with:
-          name: symphony-api-log
-          path: /home/runner/symphony/api/symphony-api.log
+          name: symphony-api-html
+          path: /home/runner/symphony/api/symphony-api.html
