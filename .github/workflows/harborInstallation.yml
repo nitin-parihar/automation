@@ -26,40 +26,39 @@ jobs:
 
     - name: Download and Deploy Harbor v2.13.0
       run: |
+        set -e  # stop on any error
         HARBOR_VERSION=2.13.0
         HOSTNAME=harbor.localdomain
 
-        # Download Harbor from SourceForge mirror (GitHub doesn't host offline installer anymore)
-        wget https://sourceforge.net/projects/harbor.mirror/files/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
-
-        # Extract and configure
+        wget https://sourceforge.net/projects/harbor.mirror/files/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download \
+          -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
         tar xvf harbor-offline-installer-v${HARBOR_VERSION}.tgz
         cd harbor
 
         cp harbor.yml.tmpl harbor.yml
 
         # Set hostname
-        if grep -q "^hostname:" harbor.yml; then
-          sed -i "s/^hostname:.*/hostname: $HOSTNAME/" harbor.yml
-        else
-          echo "hostname: $HOSTNAME" >> harbor.yml
-        fi
+        sed -i "s|^hostname:.*|hostname: ${HOSTNAME}|" harbor.yml
 
-        # Set admin password and enable HTTP
-        sed -i "s/^harbor_admin_password:.*/harbor_admin_password: Harbor12345/" harbor.yml
-        sed -i "s/^# *http:/http:/; s/^# *port: 80/  port: 80/" harbor.yml
+        # Set password and enable HTTP
+        sed -i "s|^harbor_admin_password:.*|harbor_admin_password: Harbor12345|" harbor.yml
+        sed -i "s|^#\s*http:|http:|" harbor.yml
+        sed -i "s|^#\s*port: 80|  port: 80|" harbor.yml
 
-        # Disable HTTPS block (comment it out cleanly)
+        # Disable HTTPS block
         sed -i '/^https:/,/^$/s/^/#/' harbor.yml
 
-        # Make sure hostname resolves locally
-        echo "127.0.0.1 $HOSTNAME" | sudo tee -a /etc/hosts
+        # DEBUG: Print harbor.yml to logs
+        echo ">>> DEBUG: harbor.yml contents:"
+        cat harbor.yml
+        echo ">>> END DEBUG"
 
-        # Install Harbor
+        # Add hosts entry
+        echo "127.0.0.1 ${HOSTNAME}" | sudo tee -a /etc/hosts
+
         ./install.sh --with-docker-compose
-
-        # Start services (just in case)
         docker compose up -d
+
 
     - name: Verify Harbor containers
       run: docker ps -a
