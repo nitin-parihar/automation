@@ -1,4 +1,4 @@
-name: Run Symphony Application
+name: test2WF
 
 on:
   workflow_dispatch:
