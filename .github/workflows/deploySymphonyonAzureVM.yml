@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - TestAutomation  # This workflow will still be triggered on pushes to the `TestAutomation` branch
-
+      
 env:
   VM_HOST: "52.224.241.180"
   VM_USER: "azureuser"
