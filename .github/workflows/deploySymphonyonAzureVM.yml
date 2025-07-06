@@ -1,105 +1,80 @@
-name: Azure VM SSH Login
+name: Azure VM SSH Login and Deploy Symphony
 
 on:
   workflow_dispatch:  # This allows manual triggering of the workflow
   push:
     branches:
-      - TestAutomation  # This workflow will still be triggered on pushes to the `dev` branch
+      - TestAutomation  # This workflow will still be triggered on pushes to the `TestAutomation` branch
 
 env:
   VM_HOST: "52.224.241.180"
   VM_USER: "azureuser"
   VM_PASS: "Margo@123456"
-  
+
 jobs:
-  ssh-login:
+  deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
-      - name: Set up environment variables from .env file
-        run: |
-          # Load environment variables from the .env file
-          echo "Loading .env variables..."
-          set -o allexport
-          source .env
-          set +o allexport
       - name: Log in to Azure VM using SSH
         run: |
-          # Use sshpass to authenticate using username/password
           echo "Trying to SSH to $VM_USER@$VM_HOST"
-          sshpass -p "$VM_PASS" -- ssh -vvv -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST" "echo 'Logged in successfully!'"
+          sudo apt-get install sshpass -y
+          sshpass -p "$VM_PASS" ssh -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST" <<EOF
+            echo "Logged in successfully to Azure VM."
+            # Now running Symphony API setup on the VM
 
-######################################################################################################
+            echo "Cloning Symphony repo..."
+            git clone https://github.com/eclipse-symphony/symphony.git /home/$VM_USER/symphony
 
-      - name: Print home directory
-        run: echo "HOME is $HOME"
+            echo "Directory structure of symphony repo:"
+            ls -laR /home/$VM_USER/symphony
 
-      - name: Set up Rust
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-      - name: Clone Symphony repo
-        shell: bash
-        run: |
-          set -e
-          git clone https://github.com/eclipse-symphony/symphony.git $HOME/symphony
-      - name: Inspect repo structure
-        shell: bash
-        run: |
-          echo "Directory structure of symphony repo:"
-          ls -laR $HOME/symphony
-      - name: Build Rust Library
-        shell: bash
-        run: |
-          set -e
-          RUST_DIR="$HOME/symphony/api/pkg/apis/v1alpha1/providers/target/rust"
-          if [ -d "$RUST_DIR" ]; then
-            echo "Rust directory found. Building Rust library..."
-            cd "$RUST_DIR"
-            cargo build --release
-          else
-            echo "Rust directory not found. Skipping Rust build."
-          fi
-      - name: Build Go binary
-        shell: bash
-        run: |
-          set -e
-          GO_DIR="$HOME/symphony/api"
-          if [ -d "$GO_DIR" ]; then
-            echo "Go directory found. Building Go binary..."
-            export LD_LIBRARY_PATH=$HOME/symphony/api/pkg/apis/v1alpha1/providers/target/rust/target/release
-            cd "$GO_DIR"
-            go build -o symphony-api
-          else
-            echo "Go directory not found. Skipping Go build."
-          fi
-      - name: Run symphony-api
-        shell: bash
-        working-directory: /home/runner/symphony/api
-        run: |
-          set -e
-          API_BIN="./symphony-api"
-          if [ -f "$API_BIN" ]; then
-            echo "Starting symphony-api in background..."
-            nohup env SYMPHONY_API_URL="http://localhost:8082/v1alpha2/" USE_SERVICE_ACCOUNT_TOKENS="false" \
-              ./symphony-api -c ./symphony-api-no-k8s.json -l Debug > symphony-api.log 2>&1 &
-            echo "symphony-api started."
-          else
-            echo "symphony-api binary not found. Skipping startup."
-          fi
-      - name: Check if log file exists
-        shell: bash
-        working-directory: /home/runner/symphony/api
-        run: |
-          if [ -f "symphony-api.log" ]; then
-            echo "Log file created."
-          else
-            echo "Log file not found."
-          fi
-      - name: Upload symphony-api log
+            # Build Rust Library
+            echo "Building Rust library..."
+            RUST_DIR="/home/$VM_USER/symphony/api/pkg/apis/v1alpha1/providers/target/rust"
+            if [ -d "$RUST_DIR" ]; then
+              cd "$RUST_DIR"
+              cargo build --release
+            else
+              echo "Rust directory not found. Skipping Rust build."
+            fi
+
+            # Build Go binary
+            echo "Building Go binary..."
+            GO_DIR="/home/$VM_USER/symphony/api"
+            if [ -d "$GO_DIR" ]; then
+              export LD_LIBRARY_PATH=/home/$VM_USER/symphony/api/pkg/apis/v1alpha1/providers/target/rust/target/release
+              cd "$GO_DIR"
+              go build -o symphony-api
+            else
+              echo "Go directory not found. Skipping Go build."
+            fi
+
+            # Run Symphony API
+            echo "Starting symphony-api..."
+            API_BIN="/home/$VM_USER/symphony/api/symphony-api"
+            if [ -f "$API_BIN" ]; then
+              nohup env SYMPHONY_API_URL="http://localhost:8082/v1alpha2/" USE_SERVICE_ACCOUNT_TOKENS="false" \
+                $API_BIN -c /home/$VM_USER/symphony/api/symphony-api-no-k8s.json -l Debug > /home/$VM_USER/symphony-api.log 2>&1 &
+              echo "symphony-api started in background."
+            else
+              echo "symphony-api binary not found. Skipping startup."
+            fi
+
+            # Check if log file exists
+            if [ -f "/home/$VM_USER/symphony-api.log" ]; then
+              echo "Log file created."
+            else
+              echo "Log file not found."
+            fi
+          EOF
+
+      - name: Upload Symphony API log
         uses: actions/upload-artifact@v4
         with:
           name: symphony-api-log
-          path: /home/runner/symphony/api/symphony-api.log
+          path: /home/$VM_USER/symphony-api.log
