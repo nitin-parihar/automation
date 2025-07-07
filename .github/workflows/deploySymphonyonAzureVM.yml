@@ -65,30 +65,26 @@ jobs:
       - name: Run Symphony API
         run: |
           echo "Starting symphony-api in background..."
-          set -e
-            API_BIN="./symphony-api"
-            if [ -f "$API_BIN" ]; then
-              echo "Starting symphony-api in background..."
-              env SYMPHONY_API_URL="http://localhost:8082/v1alpha2/" USE_SERVICE_ACCOUNT_TOKENS="false" \
-                ./symphony-api -c ./symphony-api-no-k8s.json -l Debug 2>&1 | tee symphony-api.log &
-              echo "symphony-api started."
-            else
-              echo "symphony-api binary not found. Skipping startup."
-            fi
+                API_BIN="$HOME/symphony/api/symphony-api"
+                if [ -f "$API_BIN" ]; then
+                  nohup env SYMPHONY_API_URL="http://localhost:8082/v1alpha2/" USE_SERVICE_ACCOUNT_TOKENS="false" \
+                    "$API_BIN" -c "$HOME/symphony/api/symphony-api-no-k8s.json" -l Debug > "$HOME/symphony-api.log" 2>&1 &
+                  echo "symphony-api started in background."
+                else
+                  echo "symphony-api binary not found, skipping startup."
+                fi
            sleep 5
            
-      - name: Check if log file exists
-        shell: bash
-        working-directory:  ~/symphony/api
-        run: |
-          if [ -f "symphony-api.log" ]; then
-            echo "Log file created."
+            if [ -f "$HOME/symphony-api.log" ]; then
+            echo "Log file exists."
+            echo "exists=true" >> $GITHUB_OUTPUT
+            cp "$HOME/symphony-api.log" ./symphony-api.log
           else
             echo "Log file not found."
+            echo "exists=false" >> $GITHUB_OUTPUT
           fi
-      - name: Upload symphony-api log
-        if: always()
+      - name: Upload Symphony API log
         uses: actions/upload-artifact@v4
         with:
           name: symphony-api-log
-          path: ./symphony-api.log
+          path: /home/$VM_USER/symphony-api.log
