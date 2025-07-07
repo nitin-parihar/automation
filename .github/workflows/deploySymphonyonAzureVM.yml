@@ -80,7 +80,7 @@ jobs:
                 else
                   echo "Log file not found."
                 fi
-EOF
+          EOF
 
       - name: Download log file from VM
         run: |
