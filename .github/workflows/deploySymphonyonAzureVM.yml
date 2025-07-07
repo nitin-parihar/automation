@@ -24,7 +24,7 @@ jobs:
 
       - name: Login to azure VM
         run: |
-          sshpass -p "$VM_PASS" ssh -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST" <<'EOF'
+          sshpass -p "$VM_PASS" ssh -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST" "echo Hello from Azure VM"
             set -e
             
       - name: Install Rust
@@ -80,7 +80,6 @@ jobs:
                 else
                   echo "Log file not found."
                 fi
-          EOF
 
       - name: Download log file from VM
         run: |
