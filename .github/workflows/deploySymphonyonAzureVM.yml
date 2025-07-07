@@ -33,13 +33,17 @@ jobs:
         run: |
                curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
                
+      - name: Set up Rust
+        run: |
+          whoami
+          pwd
+          ls -ld /home/$VM_USER
+               
       - name: Clone Symphony repo
         shell: bash
         run: |
           set -e
             echo "Cloning Symphony repo..."
-            mkdir -p /home/$VM_USER/symphony
-            chown $VM_USER:$VM_USER /home/$VM_USER/symphony
             
             git clone https://github.com/eclipse-symphony/symphony.git /home/$VM_USER/symphony
             echo "Directory structure of symphony repo:"
