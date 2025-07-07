@@ -79,7 +79,7 @@ jobs:
            
       - name: Check if log file exists
         shell: bash
-        working-directory: /home/runner/symphony/api
+        working-directory:  ~/symphony/api
         run: |
           if [ -f "symphony-api.log" ]; then
             echo "Log file created."
@@ -91,4 +91,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: symphony-api-log
-          path: /home/runner/symphony/api/symphony-api.log
+          path: ./symphony-api.log
