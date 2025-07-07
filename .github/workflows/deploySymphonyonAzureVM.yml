@@ -85,9 +85,8 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Upload Symphony API log artifact
-        if: steps.check_log.outputs.exists == 'true'
+      - name: Upload Symphony API log
         uses: actions/upload-artifact@v4
         with:
           name: symphony-api-log
-          path: ./symphony-api.log
+          path: /home/$VM_USER/symphony-api.log
