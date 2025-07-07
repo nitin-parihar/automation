@@ -73,7 +73,8 @@ jobs:
                 else
                   echo "symphony-api binary not found, skipping startup."
                 fi
-          
+           sleep 5
+           
             if [ -f "$HOME/symphony-api.log" ]; then
             echo "Log file exists."
             echo "exists=true" >> $GITHUB_OUTPUT
