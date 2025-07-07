@@ -38,6 +38,9 @@ jobs:
         run: |
           set -e
             echo "Cloning Symphony repo..."
+            mkdir -p /home/$VM_USER/symphony
+            chown $VM_USER:$VM_USER /home/$VM_USER/symphony
+            
             git clone https://github.com/eclipse-symphony/symphony.git /home/$VM_USER/symphony
             echo "Directory structure of symphony repo:"
             ls -laR /home/$VM_USER/symphony
