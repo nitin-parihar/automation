@@ -84,9 +84,9 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
           
-           - name: Fetch Symphony API log from VM
-              run: |
-                sshpass -p "$VM_PASS" scp -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST:~/symphony-api.log" .
+      - name: Fetch API log from server
+        run: |
+          sshpass -p "$VM_PASS" scp -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST:~/symphony-api.log" .
             
       - name: Upload Symphony API log
         uses: actions/upload-artifact@v4
