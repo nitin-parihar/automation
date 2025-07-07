@@ -73,13 +73,14 @@ jobs:
                 else
                   echo "symphony-api binary not found, skipping startup."
                 fi
+          sleep 5
           
                 if [ -f "$HOME/symphony-api.log" ]; then
                   echo "Log file created at $HOME/symphony-api.log"
                 else
                   echo "Log file not found."
                 fi
-          EOF
+EOF
 
       - name: Download log file from VM
         run: |
