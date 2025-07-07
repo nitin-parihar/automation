@@ -73,21 +73,19 @@ jobs:
                 else
                   echo "symphony-api binary not found, skipping startup."
                 fi
-          sleep 5
           
-                if [ -f "$HOME/symphony-api.log" ]; then
-                  echo "Log file created at $HOME/symphony-api.log"
-                else
-                  echo "Log file not found."
-                fi
+            if [ -f "$HOME/symphony-api.log" ]; then
+            echo "Log file exists."
+            echo "exists=true" >> $GITHUB_OUTPUT
 
-      - name: Download log file from VM
-        run: |
-      - name: Download symphony-api.log from Azure VM
-        run: |
-          sshpass -p "$VM_PASS" scp -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST:$HOME/symphony-api.log" ./symphony-api.log || echo "Log file not found or SCP failed."
+            cp "$HOME/symphony-api.log" ./symphony-api.log
+          else
+            echo "Log file not found."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Upload Symphony API log artifact
+        if: steps.check_log.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: symphony-api-log
