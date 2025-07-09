@@ -8,57 +8,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Install Docker Engine and Docker Compose Plugin
-      run: |
-        sudo apt-get remove -y docker docker-engine docker.io containerd runc || true
-        sudo apt-get update
-        sudo apt-get install -y ca-certificates curl gnupg lsb-release
-        sudo mkdir -p /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        sudo apt-get update
-        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-        docker --version
-        docker compose version
+      - name: Install Docker Engine and Docker Compose Plugin
+        run: |
+          sudo apt-get remove -y docker docker-engine docker.io containerd runc || true
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates curl gnupg lsb-release
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+          docker --version
+          docker compose version
 
-   - name: Download, Configure & Deploy Harbor v2.13.0 (with Debug)
-  run: |
-    set -e
+      - name: Download, Configure & Deploy Harbor v2.13.0 (with Debug)
+        run: |
+          set -e
 
-    HARBOR_VERSION=2.13.0
-    HOSTNAME=harbor.localdomain
+          HARBOR_VERSION=2.13.0
+          HOSTNAME=harbor.localdomain
 
-    # Download installer
-    wget "https://sourceforge.net/projects/harbor.mirror/files/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download" \
-      -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
+          # Download installer
+          wget "https://sourceforge.net/projects/harbor.mirror/files/v${HARBOR_VERSION}/harbor-offline-installer-v${HARBOR_VERSION}.tgz/download" \
+            -O harbor-offline-installer-v${HARBOR_VERSION}.tgz
 
-    tar xvf harbor-offline-installer-v${HARBOR_VERSION}.tgz
-    cd harbor
+          tar xvf harbor-offline-installer-v${HARBOR_VERSION}.tgz
+          cd harbor
 
-    # Prepare config
-    cp harbor.yml.tmpl harbor.yml
+          # Prepare config
+          cp harbor.yml.tmpl harbor.yml
 
-    # Apply configuration changes
-    sed -i "s|^hostname:.*|hostname: $HOSTNAME|" harbor.yml
-    sed -i "s|^harbor_admin_password:.*|harbor_admin_password: Harbor12345|" harbor.yml
-    sed -i "s|^#\s*http:|http:|" harbor.yml
-    sed -i "s|^#\s*port: 80|  port: 80|" harbor.yml
-    sed -i '/^https:/,/^$/s/^/#/' harbor.yml
+          # Apply configuration changes
+          sed -i "s|^hostname:.*|hostname: $HOSTNAME|" harbor.yml
+          sed -i "s|^harbor_admin_password:.*|harbor_admin_password: Harbor12345|" harbor.yml
+          sed -i "s|^#\s*http:|http:|" harbor.yml
+          sed -i "s|^#\s*port: 80|  port: 80|" harbor.yml
+          sed -i '/^https:/,/^$/s/^/#/' harbor.yml
 
-    # DEBUG: Show final config to log
-    echo ">>> DEBUG: harbor.yml contents <<<"
-    cat harbor.yml
-    echo ">>> End DEBUG <<<"
+          # DEBUG: Show final config to log
+          echo ">>> DEBUG: harbor.yml contents <<<"
+          cat harbor.yml
+          echo ">>> End DEBUG <<<"
 
-    # Ensure local resolution
-    echo "127.0.0.1 $HOSTNAME" | sudo tee -a /etc/hosts
+          # Ensure local resolution
+          echo "127.0.0.1 $HOSTNAME" | sudo tee -a /etc/hosts
 
-    # Run installer
-    ./install.sh --with-docker-compose
-    docker compose up -d
+          # Run installer
+          ./install.sh --with-docker-compose
+          docker compose up -d
 
-    - name: Verify Harbor containers
-      run: docker ps -a
+      - name: Verify Harbor containers
+        run: docker ps -a
