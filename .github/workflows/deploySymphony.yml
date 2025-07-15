@@ -21,7 +21,7 @@ jobs:
           set -e
           git clone -b margo-dev-sprint-1 \
           --single-branch \
-          https://github.com/margo/symphony.git $HOME/symphony
+          git@github.com:margo/symphony.git "$HOME/symphony"
       - name: Inspect repo structure
         shell: bash
         run: |
