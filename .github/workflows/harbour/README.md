@@ -1,2 +1,0 @@
-
-# Harbor Install Files
