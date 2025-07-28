@@ -98,19 +98,19 @@ jobs:
       - name: Harbor installation process begins here. Make the scripts required for installation executable
         run: | 
             set -e
-            ls -la ~/harbor
-            cd ~/harbor
-            chmod +x install.sh prepare cleanup_harbor.sh
+            ls -la ./harbor
+            chmod +x ./harbor/install.sh ./harbor/prepare ./harbor/cleanup_harbor.sh
 
       - name: Ensure correct ownership and apply secure file and folder permissions.directories to 755.files to 644
         run: |
             sudo chown -R azureuser:azureuser .
-            find . -type d -exec chmod 755 {} ;
-            find . -type f -exec chmod 644 {} ;
-            chmod +x install.sh prepare cleanup_harbor.sh
+            find ./harbor -type d -exec chmod 755 {} \;
+            find ./harbor -type f -exec chmod 644 {} \;
+            chmod +x ./harbor/install.sh ./harbor/prepare ./harbor/cleanup_harbor.sh
 
       - name: Install harbor
         run: |
+            cd ./harbor
             sudo ./install.sh
 
 
