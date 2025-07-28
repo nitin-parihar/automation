@@ -20,13 +20,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install sshpass
-        run: sudo apt-get update && sudo apt-get install -y sshpass
+      #- name: Install sshpass
+        #run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Login to private VM
-        run: |
-          sshpass -p "$VM_PASS" ssh -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST" "echo Hello from Azure VM"
-          set e  
+      #- name: Login to private VM
+        #run: |
+         # sshpass -p "$VM_PASS" ssh -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST" "echo Hello from Azure VM"
+          #set e  
           
       - name: Install Rust
         run: |
