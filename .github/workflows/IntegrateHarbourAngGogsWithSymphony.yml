@@ -111,4 +111,5 @@ jobs:
       - name: Install harbor
         run: |
             cd ./harbor
+            ./prepare
             sudo ./install.sh
