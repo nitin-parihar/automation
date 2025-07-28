@@ -85,12 +85,32 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
           
-      - name: Fetch Symphony API log from VM
-        run: |
-          sshpass -p "$VM_PASS" scp -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST:~/symphony-api.log" ./symphony-api.log
+      # - name: Fetch Symphony API log from VM
+      #   run: |
+      #     sshpass -p "$VM_PASS" scp -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST:~/symphony-api.log" ./symphony-api.log
 
-      - name: Upload Symphony API log
-        uses: actions/upload-artifact@v4
-        with:
-          name: symphony-api-log
-          path: ./symphony-api.log
+      # - name: Upload Symphony API log
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: symphony-api-log
+      #     path: ./symphony-api.log
+
+      - name: Harbor installation process begins here. Make the scripts required for installation executable
+        run: | 
+            chmod +x install.sh prepare cleanup_harbor.sh
+
+      - name: Ensure correct ownership and apply secure file and folder permissions.directories to 755.files to 644
+        run: |
+            sudo chown -R azureuser:azureuser .
+            find . -type d -exec chmod 755 {} ;
+            find . -type f -exec chmod 644 {} ;
+            chmod +x install.sh prepare cleanup_harbor.sh
+
+      - name: Install harbor
+        run: |
+            sudo ./install.sh
+
+
+
+
+            
