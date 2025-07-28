@@ -103,7 +103,7 @@ jobs:
 
       - name: Ensure correct ownership and apply secure file and folder permissions.directories to 755.files to 644
         run: |
-            sudo chown -R azureuser:azureuser .
+            #sudo chown -R azureuser:azureuser .
             find ./harbor -type d -exec chmod 755 {} \;
             find ./harbor -type f -exec chmod 644 {} \;
             chmod +x ./harbor/install.sh ./harbor/prepare ./harbor/cleanup_harbor.sh
@@ -112,8 +112,3 @@ jobs:
         run: |
             cd ./harbor
             sudo ./install.sh
-
-
-
-
-            
