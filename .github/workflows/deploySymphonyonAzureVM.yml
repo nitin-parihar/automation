@@ -7,9 +7,9 @@ on:
       - TestAutomation
 
 env:
-  VM_HOST: "52.224.241.180"
-  VM_USER: "azureuser"
-  VM_PASS: "Margo@123456"
+  VM_HOST: "10.139.9.151"
+  VM_USER: "root"
+  VM_PASS: "abc123"
 
 jobs:
   deploy:
