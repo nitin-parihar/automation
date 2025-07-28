@@ -97,6 +97,9 @@ jobs:
 
       - name: Harbor installation process begins here. Make the scripts required for installation executable
         run: | 
+            set -e
+            ls -la ~/harbor
+            cd ~/harbor
             chmod +x install.sh prepare cleanup_harbor.sh
 
       - name: Ensure correct ownership and apply secure file and folder permissions.directories to 755.files to 644
