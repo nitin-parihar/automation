@@ -13,8 +13,8 @@ env:
 
 jobs:
   deploy:
-    #runs-on: ubuntu-latest
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    #runs-on: self-hosted
 
     steps:
       - name: Checkout repository
@@ -26,7 +26,8 @@ jobs:
       - name: Login to private VM
         run: |
           sshpass -p "$VM_PASS" ssh -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST" "echo Hello from Azure VM"
-            
+          set e  
+          
       - name: Install Rust
         run: |
             echo "Installing Rust..."
