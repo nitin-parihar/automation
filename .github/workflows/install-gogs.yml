@@ -13,11 +13,14 @@ jobs:
 
       - name: Install Docker & Docker Compose
         run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io docker-compose
+          apt update
+          sudo apt install -y docker.io
           sudo systemctl start docker
-          sudo usermod -aG docker $USER
-          newgrp docker
+          sudo systemctl enable docker
+          
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose version
 
       - name: Run Gogs install script
         run: |
