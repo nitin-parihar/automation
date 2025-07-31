@@ -108,13 +108,13 @@ jobs:
             find ./harbor -type d -exec chmod 755 {} \;
             find ./harbor -type f -exec chmod 644 {} \;
             chmod +x ./harbor/install.sh ./harbor/prepare ./harbor/cleanup_harbor.sh
-
-  #Gogs Installation
+            
       - name: Install harbor
         run: |
             cd ./harbor
             sudo ./install.sh
-            
+
+      #Gogs Installation     
       - name: Install Docker & Docker Compose
         run: |
               sudo apt-get remove -y docker docker-engine docker.io containerd runc || true
@@ -124,11 +124,45 @@ jobs:
               sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
               sudo chmod +x /usr/local/bin/docker-compose       
               docker version
-              docker-compose version
-      - name: Run Gogs install script
+              docker-compose version          
+  
+      - name: Start Gogs with Docker Compose
+        run: docker-compose up --build -d
+  
+      - name: Wait for Gogs to be ready
         run: |
-          chmod +x ./install_gogs.sh
-          ./install_gogs.sh
+          echo "Waiting for Gogs to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 | grep -q "Gogs"; then
+              echo "Gogs is up!"
+              break
+            fi
+            sleep 2
+          done
+  
+      - name: Create admin user inside Gogs container
+        run: |
+          docker exec -u git custom-gogs /app/gogs/gogs admin create-user \
+            --name gogsadmin \
+            --password admin123 \
+            --email you@example.com \
+            --admin || echo "User might already exist, skipping..."
+  
+      - name: Generate API token
+        id: token
+        run: |
+          TOKEN_RESPONSE=$(curl -s -X POST "http://localhost:3000/api/v1/users/gogsadmin/tokens" \
+            -u "gogsadmin:admin123" \
+            -H "Content-Type: application/json" \
+            -d '{"name": "mytoken"}')
           
-      - name: Verify containers
-        run: docker ps -a
+          echo "$TOKEN_RESPONSE"
+          TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.sha1')
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+  
+      - name: Create repository using token
+        run: |
+          curl -X POST -H "Authorization: token ${{ steps.token.outputs.token }}" \
+               -H "Content-Type: application/json" \
+               -d '{"name":"my-new-repo","private":false}' \
+               http://localhost:3000/api/v1/user/repos
