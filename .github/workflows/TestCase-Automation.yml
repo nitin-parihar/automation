@@ -19,6 +19,6 @@ jobs:
 
       - name: Run WFM Setup
         run: |
-          sshpass -p "$VM_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-          "$VM_USER@$VM_HOST" \
+          sshpass -p "$WFM_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+          "$WFM_USER@$WFM_HOST" \
           "cd ~/nitin/sandbox/pipeline && echo 1 | sudo -E bash wfm.sh"
