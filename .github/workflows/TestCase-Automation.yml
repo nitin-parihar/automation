@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      WFM_HOST: "10.139.9.90"
-      WFM_USER: "margo"
-      WFM_PASS: "Margo@123"
+      WFM_HOST: "10.139.9.151"
+      WFM_USER: "root"
+      WFM_PASS: "abc123"
 
     steps:
       - name: Checkout repository
