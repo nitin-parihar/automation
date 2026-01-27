@@ -32,4 +32,7 @@ jobs:
         run: |
             echo "Cloning Symphony repository..."
             rm -rf "$HOME/symphony"
-            git clone https://github.com/eclipse-symphony/symphony.git "$HOME/symphony"
+            sshpass -p "abc123" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            root@10.139.9.151 \
+            "git clone --depth 1 https://github.com/eclipse-symphony/symphony.git ~/symphony"
+
