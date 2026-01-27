@@ -1,0 +1,29 @@
+name: Symphony Automation Pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+  wfm-setup:
+    name: Run WFM Setup & Start Symphony
+    runs-on: ubuntu-latest
+
+    env:
+      WFM_HOST: "10.139.9.90"
+      WFM_USER: "margo"
+      WFM_PASS: "Margo@123"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install SSH Client
+        run: sudo apt-get install -y sshpass
+
+      - name: Run WFM PreRequisites Setup (Option 1)
+        run: |
+          sshpass -p "$WFM_PASS" ssh -o StrictHostKeyChecking=no $WFM_USER@$WFM_HOST "cd ~/nitin/sandbox/pipeline && echo 1 | sudo -S -E bash wfm.sh"
+
+      - name: Start Symphony (Option 3)
+        run: |
+          sshpass -p "$WFM_PASS" ssh -o StrictHostKeyChecking=no $WFM_USER@$WFM_HOST "cd ~/nitin/sandbox/pipeline && echo 3 | sudo -S -E bash wfm.sh"
