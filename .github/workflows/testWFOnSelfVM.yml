@@ -1,4 +1,4 @@
-name: Azure VM SSH Login and Deploy Symphony
+name: Run Symphony
 
 on:
   workflow_dispatch:
@@ -13,26 +13,21 @@ env:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    #runs-on: self-hosted
+    #runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      #- name: Install sshpass
-        #run: sudo apt-get update && sudo apt-get install -y sshpass
-
-      #- name: Login to private VM
-        #run: |
-         # sshpass -p "$VM_PASS" ssh -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST" "echo Hello from Azure VM"
-          #set e  
-
-      - name: Clone Symphoy repo
-        run: |
+      - name: Clone Symphony repo on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.VM_HOST }}
+          username: ${{ env.VM_USER }}
+          password: ${{ env.VM_PASS }}
+          script: |
             echo "Cloning Symphony repository..."
-            rm -rf "$HOME/symphony"
-            sshpass -p "abc123" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-            root@10.139.9.151 \
-            "git clone --depth 1 https://github.com/eclipse-symphony/symphony.git ~/symphony"
-
+            rm -rf ~/symphony
+            git clone --depth 1 https://github.com/eclipse-symphony/symphony.git ~/symphony
+            echo "Symphony cloned successfully!"
