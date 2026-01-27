@@ -19,8 +19,12 @@ jobs:
 
       - name: Run WFM Setup
         run: |
-          ssh margo@10.139.9.90 "cd ~/nitin/sandbox/pipeline && echo 1 | sudo -E bash wfm.sh"
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+          margo@10.139.9.90 \
+          "cd ~/nitin/sandbox/pipeline && echo 1 | sudo -E bash wfm.sh"
 
       - name: Start Symphony
         run: |
-          ssh margo@10.139.9.90 "cd ~/nitin/sandbox/pipeline && echo 3 | sudo -E bash wfm.sh"
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+          margo@10.139.9.90 \
+          'cd ~/nitin/sandbox/pipeline && echo 3 | sudo -E bash wfm.sh'
