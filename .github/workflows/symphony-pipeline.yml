@@ -1,32 +1,26 @@
-name: Symphony Run
+name: TestCase Automation
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - TestAutomation
-
-env:
-  VM_HOST: "10.139.9.151"
-  VM_USER: "root"
-  VM_PASS: "abc123"
 
 jobs:
-  deploy:
+  wfm-setup:
+    name: Run WFM Setup & Start Symphony
     runs-on: ubuntu-latest
-    #runs-on: self-hosted
+
+    env:
+      WFM_HOST: "10.139.9.90"
+      WFM_USER: "margo"
+      WFM_PASS: "Margo@123"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-          
-      - name: Install Rust
+
+      - name: Run WFM Setup
         run: |
-            echo "Installing Rust..."
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-            source $HOME/.cargo/env
-      - name: Clone Symphoy repo
+          ssh margo@10.139.9.90 "cd ~/nitin/sandbox/pipeline && echo 1 | sudo -E bash wfm.sh"
+
+      - name: Start Symphony
         run: |
-            echo "Cloning Symphony repository..."
-            rm -rf "$HOME/symphony"
-            git clone https://github.com/eclipse-symphony/symphony.git "$HOME/symphony"
+          ssh margo@10.139.9.90 "cd ~/nitin/sandbox/pipeline && echo 3 | sudo -E bash wfm.sh"
