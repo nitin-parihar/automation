@@ -6,7 +6,7 @@ on:
 jobs:
   wfm-setup:
     name: Run WFM Setup & Start Symphony
-    runs-on: uself-hosted
+    runs-on: self-hosted
 
     env:
       WFM_HOST: "10.139.9.151"
